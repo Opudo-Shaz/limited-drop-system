@@ -19,4 +19,7 @@ app.use("/api", userRoutes);
 import reservationRoutes from "./routes/reservations.routes";
 app.use("/api", reservationRoutes);
 
+import checkoutRoutes from "./routes/checkout.routes";
+app.use("/api", checkoutRoutes);
+
 export default app;
