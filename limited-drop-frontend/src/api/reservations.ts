@@ -6,7 +6,17 @@ export interface Reservation {
   status: string;
 }
 
-export const reserveProduct = async (userId: string, productId: string, quantity = 1) => {
-  const res = await api.post("/reserve", { userId, productId, quantity });
-  return res.data.data as Reservation;
+interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+export const reserveProduct = async (userId: string, productId: string): Promise<Reservation> => {
+  const res = await api.post<ApiEnvelope<Reservation>>(`/reserve`, {
+    userId,
+    productId,
+    quantity: 1
+  });
+  return res.data.data;
 };

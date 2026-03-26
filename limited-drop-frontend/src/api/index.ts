@@ -1,9 +1,11 @@
 import axios from "axios";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3004/api";
+
 export const api = axios.create({
-  baseURL: "http://localhost:3004/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json"
   },
   timeout: 5000
-});``
+});

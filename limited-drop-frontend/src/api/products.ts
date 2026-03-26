@@ -6,7 +6,13 @@ export interface Product {
   stock: number;
 }
 
+interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
 export const fetchProducts = async (): Promise<Product[]> => {
-  const res = await api.get("/products");
+  const res = await api.get<ApiEnvelope<Product[]>>("/products");
   return res.data.data;
 };
