@@ -3,6 +3,9 @@ import cors from "cors";
 import morgan from "morgan";
 
 import userRoutes from "./routes/user.routes";
+import reservationRoutes from "./routes/reservations.routes";
+import checkoutRoutes from "./routes/checkout.routes";
+import productRoutes from "./routes/product.routes";
 
 const app = express();
 
@@ -16,10 +19,8 @@ app.get("/health", (req, res) => {
 
 
 app.use("/api", userRoutes);
-import reservationRoutes from "./routes/reservations.routes";
 app.use("/api", reservationRoutes);
-
-import checkoutRoutes from "./routes/checkout.routes";
 app.use("/api", checkoutRoutes);
+app.use("/api", productRoutes);
 
 export default app;
