@@ -27,5 +27,5 @@ export const ReservationTimer = ({ expiresAt, onExpire }: Props) => {
   const minutes = Math.floor(timeLeft / 60000);
   const seconds = Math.floor((timeLeft % 60000) / 1000);
 
-  return <span>{minutes}:{seconds < 10 ? "0" : ""}{seconds}</span>;
+  return <span className="reservation-timer">{minutes}:{seconds < 10 ? "0" : ""}{seconds}</span>;
 };

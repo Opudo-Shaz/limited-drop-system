@@ -32,19 +32,23 @@ export const ProductCard = ({ product, userId }: Props) => {
   };
 
   return (
-    <div style={{ border: "1px solid #ccc", padding: "1rem", margin: "1rem" }}>
-      <h3>{product.name}</h3>
-      <p>Stock: {product.stock}</p>
+    <article className="product-card">
+      <div className="product-top">
+        <h3>{product.name}</h3>
+        <p className="product-stock">Stock: {product.stock}</p>
+      </div>
+
       {reservation ? (
-        <p>
-          Reserved! <ReservationTimer expiresAt={reservation.expiresAt} onExpire={handleExpire} />
+        <p className="reservation-pill">
+          Reserved <ReservationTimer expiresAt={reservation.expiresAt} onExpire={handleExpire} />
         </p>
       ) : (
-        <button onClick={handleReserve} disabled={reserving || product.stock <= 0}>
+        <button className="reserve-btn" onClick={handleReserve} disabled={reserving || product.stock <= 0}>
           {reserving ? "Reserving..." : "Reserve"}
         </button>
       )}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+
+      {error && <p className="product-error">{error}</p>}
+    </article>
   );
 };
