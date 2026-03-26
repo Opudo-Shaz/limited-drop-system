@@ -1,68 +1,47 @@
 import { prisma } from "../lib/prisma";
-import { getReservationExpiryDate } from "./expiration.service";
 
-interface ReserveInput {
-  userId: string;
-  productId: string;
-  quantity: number;
-}
-
-export const reserveService = async ({
-  userId,
-  productId,
-  quantity
-}: ReserveInput) => {
+export const createReservation = async (userId: string, productId: string, quantity: number) => {
   return await prisma.$transaction(async (tx) => {
-
-    // Prevent duplicate active reservation
+    // 1. Check if user already has an ACTIVE reservation for this product
     const existing = await tx.reservation.findFirst({
       where: {
         userId,
         productId,
-        status: "ACTIVE"
+        status: "ACTIVE",
       }
     });
 
     if (existing) {
-      throw new Error("You already have an active reservation");
+      throw new Error("You already have an active reservation for this product");
     }
 
-    // Check product stock
-    const product = await tx.product.findUnique({
-      where: { id: productId }
-    });
+    // 2. Check product stock
+    const product = await tx.product.findUnique({ where: { id: productId } });
+    if (!product) throw new Error("Product not found");
+    if (product.stock < quantity) throw new Error("Insufficient stock");
 
-    if (!product || product.stock < quantity) {
-      throw new Error("Not enough stock");
-    }
-
-    // Deduct stock safely
-    await tx.product.update({
-      where: { id: productId },
-      data: {
-        stock: {
-          decrement: quantity
-        }
-      }
-    });
-
-    // Create reservation
+    // 3. Deduct stock and create reservation
     const reservation = await tx.reservation.create({
       data: {
         userId,
         productId,
         quantity,
         status: "ACTIVE",
-        expiresAt: getReservationExpiryDate()
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
       }
     });
 
-    // Log inventory change
+    await tx.product.update({
+      where: { id: productId },
+      data: { stock: { decrement: quantity } }
+    });
+
+    // 4. Log inventory
     await tx.inventoryLog.create({
       data: {
         productId,
         change: -quantity,
-        reason: "RESERVE"
+        reason: "RESERVATION"
       }
     });
 
