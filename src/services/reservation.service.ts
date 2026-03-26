@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { getReservationExpiryDate } from "./expiration.service";
 
 interface ReserveInput {
   userId: string;
@@ -13,7 +14,7 @@ export const reserveService = async ({
 }: ReserveInput) => {
   return await prisma.$transaction(async (tx) => {
 
-    // 1. Prevent duplicate active reservation
+    // Prevent duplicate active reservation
     const existing = await tx.reservation.findFirst({
       where: {
         userId,
@@ -26,7 +27,7 @@ export const reserveService = async ({
       throw new Error("You already have an active reservation");
     }
 
-    // 2. Check product stock
+    // Check product stock
     const product = await tx.product.findUnique({
       where: { id: productId }
     });
@@ -35,7 +36,7 @@ export const reserveService = async ({
       throw new Error("Not enough stock");
     }
 
-    // 3. Deduct stock safely
+    // Deduct stock safely
     await tx.product.update({
       where: { id: productId },
       data: {
@@ -45,18 +46,18 @@ export const reserveService = async ({
       }
     });
 
-    // 4. Create reservation
+    // Create reservation
     const reservation = await tx.reservation.create({
       data: {
         userId,
         productId,
         quantity,
         status: "ACTIVE",
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 mins
+        expiresAt: getReservationExpiryDate()
       }
     });
 
-    // 5. Log inventory change
+    // Log inventory change
     await tx.inventoryLog.create({
       data: {
         productId,
