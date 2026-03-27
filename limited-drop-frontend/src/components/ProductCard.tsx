@@ -14,6 +14,11 @@ export const ProductCard = ({ product, userId }: Props) => {
   const [error, setError] = useState("");
 
   const handleReserve = async () => {
+    if (!userId) {
+      setError("User session not ready. Refresh and try again.");
+      return;
+    }
+
     setReserving(true);
     setError("");
     try {
@@ -43,7 +48,7 @@ export const ProductCard = ({ product, userId }: Props) => {
           Reserved <ReservationTimer expiresAt={reservation.expiresAt} onExpire={handleExpire} />
         </p>
       ) : (
-        <button className="reserve-btn" onClick={handleReserve} disabled={reserving || product.stock <= 0}>
+        <button className="reserve-btn" onClick={handleReserve} disabled={reserving || product.stock <= 0 || !userId}>
           {reserving ? "Reserving..." : "Reserve"}
         </button>
       )}
