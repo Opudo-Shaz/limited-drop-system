@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
-import path from "path";
+import path from "node:path";
 
 import userRoutes from "./routes/user.routes";
 import reservationRoutes from "./routes/reservations.routes";
