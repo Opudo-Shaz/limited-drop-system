@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import path from "path";
 
 import userRoutes from "./routes/user.routes";
 import reservationRoutes from "./routes/reservations.routes";
@@ -12,9 +13,15 @@ import { requestLogger } from "./middleware/requestLogger";
 
 const app = express();
 
+// Determine allowed origins based on environment
+const isDevelopment = process.env.NODE_ENV !== "production";
+const allowedOrigins = isDevelopment
+  ? "http://localhost:3000"
+  : process.env.FRONTEND_URL || "http://localhost:3000";
+
 // CORS
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -48,6 +55,18 @@ app.use("/api", userRoutes);
 app.use("/api", reservationRoutes);
 app.use("/api", checkoutRoutes);
 app.use("/api", productRoutes);
+
+// Serve static frontend build in production
+if (process.env.NODE_ENV === "production") {
+  const frontendBuildPath = path.join(__dirname, "../limited-drop-frontend/build");
+  app.use(express.static(frontendBuildPath));
+  
+  // Fallback to index.html for React Router
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, "index.html"));
+  });
+}
+
 app.use(errorHandler);
 
 export default app;
